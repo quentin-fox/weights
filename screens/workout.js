@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, StyleSheet, ScrollView } from 'react-native';
+import PropTypes from 'prop-types';
 import ResistanceExercise from '../src/components/resistance_exercise';
 import Timer from '../src/components/timer';
 import Control from '../src/components/titlecontrol';
@@ -57,7 +58,6 @@ const WorkoutScreen = ({ navigation }) => {
         setData(newData);
     };
 
-
     const handleToggleShowing = key => {
         let newData = [...data];
         const oldState = newData[key].showing;
@@ -91,14 +91,6 @@ const WorkoutScreen = ({ navigation }) => {
         setData(newData);
 
     }
-
-    const handleNextShowing = key => {
-        if (key < data.length - 1) {
-            handleToggleShowing(key + 1);
-        } else {
-            handleToggleShowing(key);
-        }
-    };
 
     const baseAppStyle = { flex: 1, backgroundColor: '#f4f4f4' };
 
@@ -138,6 +130,10 @@ const WorkoutScreen = ({ navigation }) => {
         </SafeAreaView>
     );
 };
+
+WorkoutScreen.propTypes = {
+    navigation: PropTypes.any,
+}
 
 const style = StyleSheet.create({
     title: {
