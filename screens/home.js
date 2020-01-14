@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 
 const HomeScreen = ({ navigation }) => {
     const handleBeginWorkout = () => {
-        navigation.navigate('workout');
+        navigation.navigate('list');
     };
 
     return (
