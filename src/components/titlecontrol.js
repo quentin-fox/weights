@@ -2,25 +2,23 @@ import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
 
-const Control = ({ navigation }) => {
-    const handleEndWorkout = () => {
-        navigation.navigate('home');
-    };
-
-    const handleTest = () => {
-        navigation.navigate('list');
-    }
+const Control = ({ titleLeft, onLeft, leftDisabled=false, titleRight, onRight, rightDisabled=false }) => {
 
     return (
         <View style={style.container}>
-            <Button title="Exit" onPress={handleEndWorkout} />
-            <Button title="Begin" onPress={handleTest}/>
+            <Button title={titleLeft} onPress={onLeft} disabled={leftDisabled}/>
+            <Button title={titleRight} onPress={onRight} disabled={rightDisabled}/>
         </View>
     );
 };
 
 Control.propTypes = {
-    navigation: PropTypes.any,
+    titleLeft: PropTypes.string,
+    onLeft: PropTypes.func,
+    leftDisabled: PropTypes.bool,
+    titleRight: PropTypes.string,
+    onRight: PropTypes.func,
+    rightDisabled: PropTypes.bool,
 }
 
 const style = StyleSheet.create({

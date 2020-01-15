@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { SafeAreaView, Text, StyleSheet, ScrollView } from 'react-native';
-import ResistanceExercise from './src/components/resistance_exercise';
+import ResistanceExercise from './src/components/resistance-exercise';
 import Timer from './src/components/timer';
 import Control from './src/components/titlecontrol';
 import Navigator from './routes/mainStack';

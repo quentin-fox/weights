@@ -1,42 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { SafeAreaView, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { SafeAreaView, View, Text, StyleSheet, ScrollView } from 'react-native';
 import PropTypes from 'prop-types';
-import ResistanceExercise from '../src/components/resistance_exercise';
+import ResistanceExercise from '../src/components/resistance-exercise';
 import Timer from '../src/components/timer';
 import Control from '../src/components/titlecontrol';
+import AddButton from '../src/components/add-button';
+import NewExerciseModal from '../src/components/new-exercise-modal';
 
 const WorkoutScreen = ({ navigation }) => {
-    const [data, setData] = useState([
-        {
-            type: 'resistance',
-            key: 0,
-            showing: true,
-            complete: false,
-            name: 'Bench Press',
-            reps: 5,
-            baseWeight: 155,
-            sets: Array(5).fill(false),
-        },
-        {
-            type: 'timer',
-            key: 1,
-            showing: false,
-            complete: false,
-            initial: 10,
-            elapsed: 0,
-            paused: true,
-        },
-        {
-            type: 'resistance',
-            key: 2,
-            showing: false,
-            complete: false,
-            name: 'Overhead Press',
-            reps: 8,
-            baseWeight: 100,
-            sets: Array(4).fill(false),
-        },
-    ]);
+    const [data, setData] = useState(navigation.getParam('data'));
+
+    const canBegin = data.length > 0;
+
+    const [modalVisible, setModalVisible] = useState(false);
+
+    const title = navigation.getParam('title');
 
     const handleCyclePause = key => {
         const newData = [...data];
@@ -89,15 +67,20 @@ const WorkoutScreen = ({ navigation }) => {
         newData[key].showing = false;
         newData[key].complete = true;
         setData(newData);
-
-    }
+    };
 
     const baseAppStyle = { flex: 1, backgroundColor: '#f4f4f4' };
 
     return (
         <SafeAreaView style={baseAppStyle}>
-            <Text style={style.title}>Workout</Text>
-            <Control navigation={navigation} />
+            <Text style={style.title}>{title}</Text>
+            <Control
+                titleLeft="Back"
+                onLeft={() => navigation.goBack()}
+                titleRight="Begin"
+                rightDisabled={!canBegin}
+                onRight={() => {}}
+            />
             <ScrollView>
                 {data.map(exData => {
                     switch (exData.type) {
@@ -122,18 +105,27 @@ const WorkoutScreen = ({ navigation }) => {
                                     data={exData}
                                     key={exData.key}
                                 />
-                            );
-                        }
+            );
+            }
                     }
                 })}
+        {!modalVisible &&
+            <View style={style.addButtonContainer}>
+            <AddButton onPress={() => setModalVisible(true)} />
+            </View> }
             </ScrollView>
-        </SafeAreaView>
+                <NewExerciseModal
+        visible={modalVisible}
+                    onClose={() => setModalVisible(false)}
+                    onAddExercise={() => {}}
+                />
+                    </SafeAreaView>
     );
 };
 
 WorkoutScreen.propTypes = {
     navigation: PropTypes.any,
-}
+};
 
 const style = StyleSheet.create({
     title: {
@@ -141,6 +133,10 @@ const style = StyleSheet.create({
         fontWeight: 'bold',
         marginLeft: 10,
         marginBottom: 10,
+    },
+    addButtonContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-around',
     },
 });
 

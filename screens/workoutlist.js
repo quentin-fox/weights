@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
-import { Text, View, Button, SafeAreaView, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { Text, View, Modal, Button, SafeAreaView, FlatList, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
+import Control from '../src/components/titlecontrol';
+import NewWorkoutModal from '../src/components/new-workout-modal';
 
 
 const initialWorkouts = [
-    { title: "Chest and Shoulders", data: [
+    { title: 'Chest and Shoulders', key: 0, data: [
         { type: 'resistance', key: 0, showing: true, complete: false, name: 'Bench Press', reps: 5, baseWeight: 155, sets: Array(5).fill(false), },
         { type: 'timer', key: 1, showing: false, complete: false, initial: 10, elapsed: 0, paused: true, },
         { type: 'resistance', key: 2, showing: false, complete: false, name: 'Overhead Press', reps: 8, baseWeight: 100, sets: Array(4).fill(false), },
     ]},
-    { title: "Legs", data: [
+    { title: "Legs", key: 1, data: [
         { type: 'resistance', key: 0, showing: true, complete: false, name: 'Squats', reps: 5, baseWeight: 175, sets: Array(5).fill(false), },
         { type: 'resistance', key: 1, showing: false, complete: false, name: 'Lunges', reps: 5, baseWeight: 80, sets: Array(5).fill(false), },
         { type: 'timer', key: 2, showing: false, complete: false, initial: 60, elapsed: 0, paused: true, },
@@ -22,30 +24,70 @@ const WorkoutListScreen = ({ navigation }) => {
 
     const [workouts, setWorkouts] = useState(initialWorkouts)
 
+    const [modalVisible, setModalVisible] = useState(false);
+
     const onReturn = () => {
         navigation.goBack();
     };
 
+    const startAddNew = () => {
+        setModalVisible(true);
+    }
+
+    const handleModalClose = () => {
+        setModalVisible(false);
+    }
+
+    const handleAddWorkout = (title) => {
+        const nextKey = workouts.length;
+        const newWorkout = { title: title, key: nextKey, data: []};
+        setWorkouts([...workouts, newWorkout]);
+        setModalVisible(false);
+    }
+
     return (
-        <SafeAreaView>
-            <Text style={style.title}>Workouts</Text>
-            <View style={style.controlContainer}>
-            <Button title="Return" onPress={onReturn} />
-            </View>
-            <FlatList
-                data={workouts}
-                keyExtractor={data => data.key}
-                renderItem={( data ) => (
-                    <Button title={data.name} onPress={() => navigation.navigate('workout', data)} />
-                    )} >
-            </FlatList>
-        </SafeAreaView>
+        <React.Fragment>
+            <SafeAreaView>
+                <Text style={style.title}>Workouts</Text>
+                <Control
+                    titleLeft="Back" onLeft={onReturn}
+                    titleRight="New" onRight={startAddNew} />
+                <FlatList
+                    style={{ height: '100%' }}
+                    data={workouts}
+                    keyExtractor={data => String(data.key)}
+                    renderItem={({ item }) => <WorkoutCard navigation={navigation} item={item} />} >
+                </FlatList>
+                <NewWorkoutModal visible={modalVisible} onClose={handleModalClose} onAddWorkout={handleAddWorkout} />
+            </SafeAreaView>
+        </React.Fragment>
     );
 };
 
 WorkoutListScreen.propTypes = {
     navigation: PropTypes.any,
 };
+
+
+const WorkoutCard = ({ item, navigation }) => {
+
+    const onDoWorkout = () => {
+        navigation.navigate('workout', item)
+    }
+
+    return (
+        <TouchableWithoutFeedback onPress={onDoWorkout}>
+            <View style={style.workoutContainer}>
+                <Text style={style.workoutTitle}>{item.title}</Text>
+            </View>
+        </TouchableWithoutFeedback>
+    )
+}
+
+WorkoutCard.propTypes = {
+    item: PropTypes.object,
+    navigation: PropTypes.any,
+}
 
 const style = StyleSheet.create({
     title: {
@@ -58,7 +100,26 @@ const style = StyleSheet.create({
         marginLeft: 5,
         marginRight: 5,
         marginBottom: 10,
-    }
+    },
+    workoutTitle: {
+        flex: 1,
+        marginLeft: 10,
+        minHeight: 15,
+        fontSize: 20,
+    },
+    workoutContainer: {
+        marginLeft: 10,
+        marginRight: 10,
+        marginBottom: 15,
+        padding: 10,
+        backgroundColor: 'white',
+        borderRadius: 10,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.3,
+        shadowRadius: 2,
+        elevation: 1,
+    },
 });
 
 
