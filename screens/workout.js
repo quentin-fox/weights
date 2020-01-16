@@ -7,12 +7,11 @@ import Control from '../src/components/titlecontrol';
 import AddButton from '../src/components/add-button';
 import NewExerciseModal from '../src/components/new-exercise-modal';
 
-const WorkoutScreen = ({ navigation, id }) => {
+const WorkoutScreen = ({ navigation }) => {
     const [data, setData] = useState(navigation.getParam('data'));
+    // const id = navigation.getParam('id');
 
-    const onAddExercise = navigation.getParam('onAddExercise')
-
-    const canBegin = data.length > 0;
+    const canBeginWorkout = data.length > 0;
 
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -43,14 +42,44 @@ const WorkoutScreen = ({ navigation, id }) => {
         const oldState = newData[key].showing;
         newData[key].showing = !newData[key].showing;
         if (oldState === false) {
-            newData = newData.map(d => {
-                if (d.key !== key) {
+            newData = newData.map((d, i) => {
+                if (i !== key) {
                     d.showing = false;
                 }
                 return d;
             });
         }
         setData(newData);
+    };
+
+    const handleAddExercise = (exData, type) => {
+
+        const shapeData = (exData, type) => {
+            switch (type) {
+                case 'resistance':
+                    return {
+                        baseWeight: exData.weight,
+                        name: exData.name,
+                        reps: exData.reps,
+                        sets: Array(exData.sets).fill(false),
+                    };
+                case 'timer':
+                    return {
+                        initial: exData.duration,
+                        elapsed: 0,
+                        paused: true,
+                    };
+            }
+        };
+
+        let newExercise = shapeData(exData, type);
+        newExercise['showing'] = false;
+        newExercise['complete'] = false;
+        newExercise['type'] = type;
+
+        console.log(newExercise)
+
+        setData([...data, newExercise]);
     };
 
     const handleToggleSet = (exKey, setKey) => {
@@ -73,10 +102,6 @@ const WorkoutScreen = ({ navigation, id }) => {
 
     const baseAppStyle = { flex: 1, backgroundColor: '#f4f4f4' };
 
-    const handleAddExercise = (data, type) => {
-        onAddExercise(id, data, type)
-    }
-
     return (
         <SafeAreaView style={baseAppStyle}>
             <Text style={style.title}>{title}</Text>
@@ -84,7 +109,7 @@ const WorkoutScreen = ({ navigation, id }) => {
                 titleLeft="Back"
                 onLeft={() => navigation.goBack()}
                 titleRight="Begin"
-                rightDisabled={!canBegin}
+                rightDisabled={!canBeginWorkout}
                 onRight={() => {}}
             />
             <ScrollView>
@@ -96,7 +121,7 @@ const WorkoutScreen = ({ navigation, id }) => {
                                     onToggleSet={handleToggleSet}
                                     onToggleShowing={handleToggleShowing}
                                     onComplete={handleComplete}
-                                    data={{...exData, key: index}}
+                                    data={{ ...exData, key: index }}
                                     key={index}
                                 />
                             );
@@ -108,31 +133,30 @@ const WorkoutScreen = ({ navigation, id }) => {
                                     onCountDown={handleCountDown}
                                     onToggleShowing={handleToggleShowing}
                                     onComplete={handleComplete}
-                                    data={{...exData, key: index}}
+                                    data={{ ...exData, key: index }}
                                     key={index}
                                 />
-            );
-            }
+                            );
+                        }
                     }
                 })}
-        {!modalVisible &&
-            <View style={style.addButtonContainer}>
-            <AddButton onPress={() => setModalVisible(true)} />
-            </View> }
+                {!modalVisible && (
+                    <View style={style.addButtonContainer}>
+                        <AddButton onPress={() => setModalVisible(true)} />
+                    </View>
+                )}
             </ScrollView>
-                <NewExerciseModal
-        visible={modalVisible}
-                    onClose={() => setModalVisible(false)}
-                    onAddExercise={handleAddExercise}
-                />
-                    </SafeAreaView>
+            <NewExerciseModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                onAddExercise={handleAddExercise}
+            />
+        </SafeAreaView>
     );
 };
 
 WorkoutScreen.propTypes = {
     navigation: PropTypes.any,
-    id: PropTypes.number,
-    onAddExercise: PropTypes.func,
 };
 
 const style = StyleSheet.create({

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useReducer } from 'react';
-import { View, Text, Picker, StyleSheet, Keyboard, PanResponder } from 'react-native';
+import { View, Text, TextInput, Picker, StyleSheet, Keyboard, PanResponder } from 'react-native';
 import Modal from 'react-native-modal';
 import PropTypes from 'prop-types';
 import Control from './titlecontrol';
@@ -28,9 +28,11 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
         switch (exerciseType) {
             case 'timer':
                 onAddExercise(timerData, 'timer');
+                onClose()
                 break;
             case 'resistance':
                 onAddExercise(resistanceData, 'resistance');
+                onClose()
                 break;
         }
     };
@@ -51,6 +53,17 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
             case 'resistance':
                 return (
                     <>
+                        <TextInput
+                            style={style.input}
+                            autoCorrect={false}
+                            clearButtonMode={'while-editing'}
+                            maxLength={50}
+                            placeholder={'Exercise Name'}
+                            onChangeText={text =>
+                                resistanceDispatch({ type: 'setname', name: text })
+                            }
+                            value={resistanceData.name}
+                        />
                         <Stepper
                             count={resistanceData.reps}
                             min={0}
@@ -106,7 +119,7 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
                     <Picker
                         selectedValue={exerciseType}
                         style={style.picker}
-                        itemStyle={{ height: 90 }}
+                        itemStyle={{ height: 80 }}
                         onValueChange={itemValue => setExerciseType(itemValue)}>
                         {types.map((tp, index) => (
                             <Picker.Item key={index} label={tp.label} value={tp.value} />
@@ -120,6 +133,7 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
 };
 
 const initialResistanceData = {
+    name: '',
     sets: 0,
     weight: 0,
     reps: 0,
@@ -129,7 +143,7 @@ const initialTimerData = {
     duration: 0,
 };
 
-const resistanceReducer = (state, { type, field, by = 1 }) => {
+const resistanceReducer = (state, { type, name = '', field = null, by = 1 }) => {
     switch (type) {
         case 'increment':
             return {
@@ -141,6 +155,12 @@ const resistanceReducer = (state, { type, field, by = 1 }) => {
                 ...state,
                 [field]: state[field] - by,
             };
+        case 'setname': {
+            return {
+                ...state,
+                name: name,
+            };
+        }
         case 'reset':
             return initialResistanceData;
     }
@@ -189,6 +209,14 @@ const style = StyleSheet.create({
         paddingRight: 10,
     },
     picker: {},
+    input: {
+        backgroundColor: '#f4f4f4',
+        borderRadius: 10,
+        fontSize: 18,
+        paddingLeft: 10,
+        height: 40,
+        marginBottom: 10,
+    },
 });
 
 export default NewExerciseModal;

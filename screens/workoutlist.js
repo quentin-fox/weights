@@ -109,34 +109,6 @@ const WorkoutListScreen = ({ navigation }) => {
         setModalVisible(false);
     };
 
-    const handleAddExercise = (key, data, type) => {
-        const transformData = (data, type) => {
-            switch (type) {
-                case 'timer':
-                    return {
-                        initial: data.duration,
-                        elapsed: 0,
-                        paused: true,
-                    };
-                case 'resistance':
-                    return {
-                        name: 'Test',
-                        reps: data.reps,
-                        baseWeight: data.reps,
-                        sets: Array(data.sets).fill(false),
-                    };
-            }
-        };
-
-        let newWorkouts = [...workouts];
-        let newEx = transformData(data, type);
-
-        newEx = { ...newEx, showing: false, complete: false };
-
-        newWorkouts[key].data.push(newEx);
-        setWorkouts(newWorkouts);
-    };
-
     return (
         <React.Fragment>
             <SafeAreaView>
@@ -152,11 +124,7 @@ const WorkoutListScreen = ({ navigation }) => {
                     data={workouts}
                     keyExtractor={data => data.title}
                     renderItem={({ item, index }) => (
-                        <WorkoutCard
-                            navigation={navigation}
-                            id={index}
-                            item={{...item, onAddExercise: handleAddExercise}}
-                        />
+                        <WorkoutCard navigation={navigation} id={index} item={item} />
                     )}
                 />
                 <NewWorkoutModal
@@ -173,9 +141,9 @@ WorkoutListScreen.propTypes = {
     navigation: PropTypes.any,
 };
 
-const WorkoutCard = ({ item, navigation }) => {
+const WorkoutCard = ({ navigation, id, item }) => {
     const onDoWorkout = () => {
-        navigation.navigate('workout', item);
+        navigation.navigate('workout', {...item, id: id});
     };
 
     return (
@@ -188,8 +156,9 @@ const WorkoutCard = ({ item, navigation }) => {
 };
 
 WorkoutCard.propTypes = {
-    item: PropTypes.object,
     navigation: PropTypes.any,
+    id: PropTypes.number,
+    item: PropTypes.object,
 };
 
 const style = StyleSheet.create({

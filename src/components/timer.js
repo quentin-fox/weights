@@ -53,6 +53,7 @@ const style = StyleSheet.create({
         marginRight: 10,
         marginBottom: 15,
         padding: 10,
+        paddingBottom: 5,
         backgroundColor: 'white',
         borderRadius: 10,
         shadowColor: '#000',
@@ -66,6 +67,7 @@ const style = StyleSheet.create({
         justifyContent: 'space-between',
         paddingLeft: 10,
         paddingRight: 10,
+        marginBottom: 10,
     },
     timerTitle: {
         flex: 1,
