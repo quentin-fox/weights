@@ -3,6 +3,7 @@ import { View, Text, TextInput, StyleSheet, Keyboard } from 'react-native';
 import Modal from 'react-native-modal';
 import PropTypes from 'prop-types';
 import Control from './titlecontrol';
+import Handle from './drawer-handle';
 
 const NewWorkoutModal = ({ visible, onClose, onAddWorkout }) => {
     const [workoutTitle, setWorkoutTitle] = useState('');
@@ -52,10 +53,8 @@ NewWorkoutModal.propTypes = {
 
 const style = StyleSheet.create({
     container: {
-        borderTopLeftRadius: 20,
-        borderTopRightRadius: 20,
-        height: 320,
-        marginTop: 700,
+        height: 120,
+        borderRadius: 20,
         marginLeft: -10,
         marginRight: -10,
         padding: 10,
@@ -65,6 +64,13 @@ const style = StyleSheet.create({
         shadowOpacity: 0.2,
         shadowRadius: 2,
         elevation: 1,
+    },
+    handleBar: {
+        width: 70,
+        height: 8,
+        borderRadius: 5,
+        backgroundColor: '#dddddd',
+        alignSelf: 'center',
     },
     form: {
         paddingLeft: 10,

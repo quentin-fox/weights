@@ -1,24 +1,96 @@
-import React, { useState, useReducer } from 'react';
-import { View, Text, Picker, StyleSheet, Keyboard } from 'react-native';
+import React, { useState, useEffect, useReducer } from 'react';
+import { View, Text, Picker, StyleSheet, Keyboard, PanResponder } from 'react-native';
 import Modal from 'react-native-modal';
 import PropTypes from 'prop-types';
 import Control from './titlecontrol';
 import Stepper from './stepper';
+import Handle from './drawer-handle';
 
 const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
     const [exerciseType, setExerciseType] = useState('resistance');
 
-    const initialExerciseData = {
-        timer: { duration: 0 },
-        resistance: { sets: 0, weight: 0, reps: 0 },
-    };
+    const [drawerPos, setDrawerPos] = useState(350);
 
-    const [exerciseData, dispatch] = useReducer(reducer, initialExerciseData);
+    useEffect(() => setDrawerPos(350), [visible]);
+
+    const [resistanceData, resistanceDispatch] = useReducer(
+        resistanceReducer,
+        initialResistanceData
+    );
+    const [timerData, timerDispatch] = useReducer(timerReducer, initialTimerData);
 
     const types = [
         { label: 'Resistance Exercise', value: 'resistance' },
         { label: 'Timer', value: 'timer' },
     ];
+
+    const onSubmit = () => {
+        switch (exerciseType) {
+            case 'timer':
+                onAddExercise(timerData, 'timer');
+                break;
+            case 'resistance':
+                onAddExercise(resistanceData, 'resistance');
+                break;
+        }
+    };
+
+    const formType = () => {
+        switch (exerciseType) {
+            case 'timer':
+                return (
+                    <Stepper
+                        count={timerData.duration}
+                        min={0}
+                        label="Duration"
+                        countSuffix=" s"
+                        onIncrement={() => timerDispatch({ type: 'increment', by: 5 })}
+                        onDecrement={() => timerDispatch({ type: 'decrement', by: 5 })}
+                    />
+                );
+            case 'resistance':
+                return (
+                    <>
+                        <Stepper
+                            count={resistanceData.reps}
+                            min={0}
+                            max={25}
+                            label="Reps"
+                            onIncrement={() =>
+                                resistanceDispatch({ type: 'increment', field: 'reps' })
+                            }
+                            onDecrement={() =>
+                                resistanceDispatch({ type: 'decrement', field: 'reps' })
+                            }
+                        />
+                        <Stepper
+                            count={resistanceData.sets}
+                            min={0}
+                            max={25}
+                            label="Sets"
+                            onIncrement={() =>
+                                resistanceDispatch({ type: 'increment', field: 'sets' })
+                            }
+                            onDecrement={() =>
+                                resistanceDispatch({ type: 'decrement', field: 'sets' })
+                            }
+                        />
+                        <Stepper
+                            count={resistanceData.weight}
+                            countSuffix=" lbs"
+                            min={0}
+                            label="Weight"
+                            onIncrement={() =>
+                                resistanceDispatch({ type: 'increment', field: 'weight', by: 5 })
+                            }
+                            onDecrement={() =>
+                                resistanceDispatch({ type: 'decrement', field: 'weight', by: 5 })
+                            }
+                        />
+                    </>
+                );
+        }
+    };
 
     return (
         <Modal
@@ -26,8 +98,10 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
             onBackdropPress={onClose}
             avoidKeyboard={true}
             backdropOpacity={0.3}>
-            <View style={style.container}>
-                <Control titleLeft="Close" onLeft={onClose} titleRight="Add" onRight={() => {}} />
+            <View style={{ ...style.container, marginTop: drawerPos }}>
+                <Control titleLeft="Close" onLeft={onClose} titleRight="Add" onRight={onSubmit}>
+                    <Handle setPos={setDrawerPos} closeDrawer={onClose} />
+                </Control>
                 <View style={style.form}>
                     <Picker
                         selectedValue={exerciseType}
@@ -38,55 +112,52 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
                             <Picker.Item key={index} label={tp.label} value={tp.value} />
                         ))}
                     </Picker>
-                    {/* {formType(exerciseType)} */}
-                    <Stepper
-                        count={exerciseData.resistance.reps}
-                        min={0}
-                        max={25}
-                        label="Reps"
-                        onIncrement={() => dispatch({ type: 'increment', field: 'reps' })}
-                        onDecrement={() => dispatch({ type: 'decrement', field: 'reps' })}
-                    />
-                    <Stepper
-                        count={exerciseData.resistance.sets}
-                        min={0}
-                        max={25}
-                        label="Sets"
-                        onIncrement={() => dispatch({ type: 'increment', field: 'sets' })}
-                        onDecrement={() => dispatch({ type: 'decrement', field: 'sets' })}
-                    />
-                    <Stepper
-                        count={exerciseData.resistance.weight}
-                        countSuffix=" lbs"
-                        min={0}
-                        label="Weight"
-                        onIncrement={() => dispatch({ type: 'increment', field: 'weight', by: 5 })}
-                        onDecrement={() => dispatch({ type: 'decrement', field: 'weight', by: 5 })}
-                    />
+                    {formType()}
                 </View>
             </View>
         </Modal>
     );
 };
 
-const reducer = (state, { type, field, by = 1}) => {
+const initialResistanceData = {
+    sets: 0,
+    weight: 0,
+    reps: 0,
+};
+
+const initialTimerData = {
+    duration: 0,
+};
+
+const resistanceReducer = (state, { type, field, by = 1 }) => {
     switch (type) {
         case 'increment':
             return {
-                ...state.timer,
-                resistance: {
-                    ...state.resistance,
-                    [field]: state.resistance[field] + by,
-                },
+                ...state,
+                [field]: state[field] + by,
             };
         case 'decrement':
             return {
-                ...state.timer,
-                resistance: {
-                    ...state.resistance,
-                    [field]: state.resistance[field] - by,
-                },
+                ...state,
+                [field]: state[field] - by,
             };
+        case 'reset':
+            return initialResistanceData;
+    }
+};
+
+const timerReducer = (state, { type, by = 1 }) => {
+    switch (type) {
+        case 'increment':
+            return {
+                duration: state.duration + by,
+            };
+        case 'decrement':
+            return {
+                duration: state.duration - by,
+            };
+        case 'reset':
+            return initialTimerData;
     }
 };
 
@@ -100,7 +171,7 @@ const style = StyleSheet.create({
     container: {
         borderTopLeftRadius: 20,
         borderTopRightRadius: 20,
-        marginTop: 350,
+        height: 1000,
         marginBottom: -30,
         marginLeft: -10,
         marginRight: -10,

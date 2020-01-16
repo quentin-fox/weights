@@ -2,17 +2,19 @@ import React from 'react';
 import { View, Button, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
 
-const Control = ({ titleLeft, onLeft, leftDisabled=false, titleRight, onRight, rightDisabled=false }) => {
+const Control = ({ children, titleLeft, onLeft, leftDisabled=false, titleRight, onRight, rightDisabled=false }) => {
 
     return (
         <View style={style.container}>
             <Button title={titleLeft} onPress={onLeft} disabled={leftDisabled}/>
+            {children}
             <Button title={titleRight} onPress={onRight} disabled={rightDisabled}/>
         </View>
     );
 };
 
 Control.propTypes = {
+    children: PropTypes.any,
     titleLeft: PropTypes.string,
     onLeft: PropTypes.func,
     leftDisabled: PropTypes.bool,

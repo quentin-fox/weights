@@ -7,8 +7,10 @@ import Control from '../src/components/titlecontrol';
 import AddButton from '../src/components/add-button';
 import NewExerciseModal from '../src/components/new-exercise-modal';
 
-const WorkoutScreen = ({ navigation }) => {
+const WorkoutScreen = ({ navigation, id }) => {
     const [data, setData] = useState(navigation.getParam('data'));
+
+    const onAddExercise = navigation.getParam('onAddExercise')
 
     const canBegin = data.length > 0;
 
@@ -71,6 +73,10 @@ const WorkoutScreen = ({ navigation }) => {
 
     const baseAppStyle = { flex: 1, backgroundColor: '#f4f4f4' };
 
+    const handleAddExercise = (data, type) => {
+        onAddExercise(id, data, type)
+    }
+
     return (
         <SafeAreaView style={baseAppStyle}>
             <Text style={style.title}>{title}</Text>
@@ -82,7 +88,7 @@ const WorkoutScreen = ({ navigation }) => {
                 onRight={() => {}}
             />
             <ScrollView>
-                {data.map(exData => {
+                {data.map((exData, index) => {
                     switch (exData.type) {
                         case 'resistance':
                             return (
@@ -90,8 +96,8 @@ const WorkoutScreen = ({ navigation }) => {
                                     onToggleSet={handleToggleSet}
                                     onToggleShowing={handleToggleShowing}
                                     onComplete={handleComplete}
-                                    data={exData}
-                                    key={exData.key}
+                                    data={{...exData, key: index}}
+                                    key={index}
                                 />
                             );
                         case 'timer': {
@@ -102,8 +108,8 @@ const WorkoutScreen = ({ navigation }) => {
                                     onCountDown={handleCountDown}
                                     onToggleShowing={handleToggleShowing}
                                     onComplete={handleComplete}
-                                    data={exData}
-                                    key={exData.key}
+                                    data={{...exData, key: index}}
+                                    key={index}
                                 />
             );
             }
@@ -117,7 +123,7 @@ const WorkoutScreen = ({ navigation }) => {
                 <NewExerciseModal
         visible={modalVisible}
                     onClose={() => setModalVisible(false)}
-                    onAddExercise={() => {}}
+                    onAddExercise={handleAddExercise}
                 />
                     </SafeAreaView>
     );
@@ -125,6 +131,8 @@ const WorkoutScreen = ({ navigation }) => {
 
 WorkoutScreen.propTypes = {
     navigation: PropTypes.any,
+    id: PropTypes.number,
+    onAddExercise: PropTypes.func,
 };
 
 const style = StyleSheet.create({
