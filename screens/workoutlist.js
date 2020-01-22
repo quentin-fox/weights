@@ -10,83 +10,27 @@ import {
 import PropTypes from 'prop-types';
 import Control from '../src/components/titlecontrol';
 import NewWorkoutModal from '../src/components/new-workout-modal';
+import { connect } from 'react-redux';
+import { addWorkout } from '../reducers/rootReducer';
 
-const initialWorkouts = [
-    {
-        title: 'Chest and Shoulders',
-        data: [
-            {
-                type: 'resistance',
-                showing: true,
-                complete: false,
-                name: 'Bench Press',
-                reps: 5,
-                baseWeight: 155,
-                sets: Array(5).fill(false),
-            },
-            {
-                type: 'timer',
-                showing: false,
-                complete: false,
-                initial: 10,
-                elapsed: 0,
-                paused: true,
-            },
-            {
-                type: 'resistance',
-                showing: false,
-                complete: false,
-                name: 'Overhead Press',
-                reps: 8,
-                baseWeight: 100,
-                sets: Array(4).fill(false),
-            },
-        ],
-    },
-    {
-        title: 'Legs',
-        data: [
-            {
-                type: 'resistance',
-                showing: true,
-                complete: false,
-                name: 'Squats',
-                reps: 5,
-                baseWeight: 175,
-                sets: Array(5).fill(false),
-            },
-            {
-                type: 'resistance',
-                showing: false,
-                complete: false,
-                name: 'Lunges',
-                reps: 5,
-                baseWeight: 80,
-                sets: Array(5).fill(false),
-            },
-            {
-                type: 'timer',
-                showing: false,
-                complete: false,
-                initial: 60,
-                elapsed: 0,
-                paused: true,
-            },
-            {
-                type: 'resistance',
-                showing: false,
-                complete: false,
-                name: 'Hip Thrusts',
-                reps: 8,
-                baseWeight: 225,
-                sets: Array(5).fill(false),
-            },
-        ],
-    },
-];
+const mapStateToProps = state => {
+    return {
+        workouts: state.map((workout, index) => {
+            return {
+                key: index,
+                title: workout.title,
+            };
+        }),
+    };
+};
 
-const WorkoutListScreen = ({ navigation }) => {
-    const [workouts, setWorkouts] = useState(initialWorkouts);
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddWorkout: (name) => dispatch(addWorkout(name))
+    }
+}
+
+const WorkoutListScreen = ({ navigation, workouts, onAddWorkout }) => {
 
     const [modalVisible, setModalVisible] = useState(false);
 
@@ -99,13 +43,6 @@ const WorkoutListScreen = ({ navigation }) => {
     };
 
     const handleModalClose = () => {
-        setModalVisible(false);
-    };
-
-    const handleAddWorkout = title => {
-        const nextKey = workouts.length;
-        const newWorkout = { title: title, key: nextKey, data: [] };
-        setWorkouts([...workouts, newWorkout]);
         setModalVisible(false);
     };
 
@@ -123,14 +60,14 @@ const WorkoutListScreen = ({ navigation }) => {
                     style={{ height: '100%' }}
                     data={workouts}
                     keyExtractor={data => data.title}
-                    renderItem={({ item, index }) => (
-                        <WorkoutCard navigation={navigation} id={index} item={item} />
+                    renderItem={({ _, index }) => (
+                        <WorkoutCard navigation={navigation} id={index} />
                     )}
                 />
                 <NewWorkoutModal
                     visible={modalVisible}
                     onClose={handleModalClose}
-                    onAddWorkout={handleAddWorkout}
+                    onAddWorkout={onAddWorkout}
                 />
             </SafeAreaView>
         </React.Fragment>
@@ -139,11 +76,13 @@ const WorkoutListScreen = ({ navigation }) => {
 
 WorkoutListScreen.propTypes = {
     navigation: PropTypes.any,
+    onAddWorkout: PropTypes.func,
+    workouts: PropTypes.arrayOf(PropTypes.object),
 };
 
-const WorkoutCard = ({ navigation, id, item }) => {
+const WorkoutCard = ({ navigation, id }) => {
     const onDoWorkout = () => {
-        navigation.navigate('workout', {...item, id: id});
+        navigation.navigate('workout', { id });
     };
 
     return (
@@ -158,7 +97,6 @@ const WorkoutCard = ({ navigation, id, item }) => {
 WorkoutCard.propTypes = {
     navigation: PropTypes.any,
     id: PropTypes.number,
-    item: PropTypes.object,
 };
 
 const style = StyleSheet.create({
@@ -194,4 +132,4 @@ const style = StyleSheet.create({
     },
 });
 
-export default WorkoutListScreen;
+export default connect(mapStateToProps, mapDispatchToProps)(WorkoutListScreen);

@@ -1,6 +1,6 @@
 import produce from 'immer';
 
-export const addWorkout = (id, name) => {
+export const addWorkout = (name) => {
     return {
         type: 'ADD_WORKOUT',
         payload: name,

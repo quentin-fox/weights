@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Keyboard } from 'react-native';
+import { View, TextInput, StyleSheet, Keyboard } from 'react-native';
 import Modal from 'react-native-modal';
 import PropTypes from 'prop-types';
 import Control from './titlecontrol';
-import Handle from './drawer-handle';
+// import Handle from './drawer-handle';
 
 const NewWorkoutModal = ({ visible, onClose, onAddWorkout }) => {
     const [workoutTitle, setWorkoutTitle] = useState('');
