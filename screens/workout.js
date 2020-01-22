@@ -6,16 +6,30 @@ import Timer from '../src/components/timer';
 import Control from '../src/components/titlecontrol';
 import AddButton from '../src/components/add-button';
 import NewExerciseModal from '../src/components/new-exercise-modal';
+import { connect } from 'react-redux';
+import { addExercise } from '../reducers/rootReducer';
 
-const WorkoutScreen = ({ navigation }) => {
-    const [data, setData] = useState(navigation.getParam('data'));
-    // const id = navigation.getParam('id');
+const mapStateToProps = (state, ownProps) => {
+    const workoutID = ownProps.navigation.state.params.id;
+    return {
+        workout: state[workoutID],
+    }
+}
+ const mapDispatchToProps = dispatch => {
+     return {
+         onAddExercise: (key, type, data) => dispatch(addExercise(key, type, data))
+     }
+ }
 
-    const canBeginWorkout = data.length > 0;
+const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
+
+    const [data, setData] = useState(workout);
+
+    const canBeginWorkout = workout.data > 0;
 
     const [modalVisible, setModalVisible] = useState(false);
 
-    const title = navigation.getParam('title');
+    const title = workout.title;
 
     const handleCyclePause = key => {
         const newData = [...data];
@@ -52,35 +66,40 @@ const WorkoutScreen = ({ navigation }) => {
         setData(newData);
     };
 
-    const handleAddExercise = (exData, type) => {
+    const handleAddExercise = (type, data) => {
+        const workoutID = props.navigation.state.params.id;
+        onAddExercise(workoutID, type, data)
+    }
 
-        const shapeData = (exData, type) => {
-            switch (type) {
-                case 'resistance':
-                    return {
-                        baseWeight: exData.weight,
-                        name: exData.name,
-                        reps: exData.reps,
-                        sets: Array(exData.sets).fill(false),
-                    };
-                case 'timer':
-                    return {
-                        initial: exData.duration,
-                        elapsed: 0,
-                        paused: true,
-                    };
-            }
-        };
+    // const handleAddExercise = (exData, type) => {
 
-        let newExercise = shapeData(exData, type);
-        newExercise['showing'] = false;
-        newExercise['complete'] = false;
-        newExercise['type'] = type;
+    //     const shapeData = (exData, type) => {
+    //         switch (type) {
+    //             case 'resistance':
+    //                 return {
+    //                     baseWeight: exData.weight,
+    //                     name: exData.name,
+    //                     reps: exData.reps,
+    //                     sets: Array(exData.sets).fill(false),
+    //                 };
+    //             case 'timer':
+    //                 return {
+    //                     initial: exData.duration,
+    //                     elapsed: 0,
+    //                     paused: true,
+    //                 };
+    //         }
+    //     };
 
-        console.log(newExercise)
+    //     let newExercise = shapeData(exData, type);
+    //     newExercise['showing'] = false;
+    //     newExercise['complete'] = false;
+    //     newExercise['type'] = type;
 
-        setData([...data, newExercise]);
-    };
+    //     console.log(newExercise)
+
+    //     setData([...data, newExercise]);
+    // };
 
     const handleToggleSet = (exKey, setKey) => {
         const newData = [...data];
@@ -172,4 +191,4 @@ const style = StyleSheet.create({
     },
 });
 
-export default WorkoutScreen;
+export default connect(mapStateToProps, mapDispatchToProps)(WorkoutScreen);
