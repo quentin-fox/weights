@@ -5,11 +5,11 @@ export const addWorkout = name => {
     };
 };
 
-export const addExercise = (key, type, data) => {
+export const addExercise = (workoutKey, type, data) => {
     return {
         type: 'ADD_EXERCISE',
         payload: {
-            key,
+            workoutKey,
             type,
             data,
         },

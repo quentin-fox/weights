@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import Control from '../src/components/titlecontrol';
 import NewWorkoutModal from '../src/components/new-workout-modal';
 import { connect } from 'react-redux';
-import { addWorkout } from '../reducers/rootReducer';
+import { addWorkout } from '../actions/actions';
 
 const mapStateToProps = state => {
     return {
@@ -26,12 +26,11 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        onAddWorkout: (name) => dispatch(addWorkout(name))
-    }
-}
+        onAddWorkout: name => dispatch(addWorkout(name)),
+    };
+};
 
 const WorkoutListScreen = ({ navigation, workouts, onAddWorkout }) => {
-
     const [modalVisible, setModalVisible] = useState(false);
 
     const onReturn = () => {
@@ -133,4 +132,7 @@ const style = StyleSheet.create({
     },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(WorkoutListScreen);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(WorkoutListScreen);

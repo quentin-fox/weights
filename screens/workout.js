@@ -43,33 +43,35 @@ const WorkoutScreen = ({
     onToggleShowing,
     onToggleSet,
 }) => {
-
-
     const data = workout.data;
     const canBeginWorkout = workout.data.length > 0;
     const title = workout.title;
     const workoutKey = navigation.state.params.id;
 
+    const handleAddExercise = (type, data) => {
+        onAddExercise(workoutKey, type, data);
+    };
+
     const handleCyclePause = exKey => {
-        onCyclePause(workoutKey, exKey)
+        onCyclePause(workoutKey, exKey);
     };
 
     const handleCountDown = exKey => {
-        const by = 1
-        onCountDown(workoutKey, exKey, by)
-    }
+        const by = 1;
+        onCountDown(workoutKey, exKey, by);
+    };
 
     const handleResetTimer = exKey => {
-        onResetTimer(workoutKey, exKey)
-    }
+        onResetTimer(workoutKey, exKey);
+    };
 
     const handleToggleShowing = exKey => {
-        onToggleShowing(workoutKey, exKey)
-    }
+        onToggleShowing(workoutKey, exKey);
+    };
 
     const handleToggleSet = (exKey, setKey) => {
-        onToggleSet(workoutKey, exKey, setKey)
-    }
+        onToggleSet(workoutKey, exKey, setKey);
+    };
 
     const baseAppStyle = { flex: 1, backgroundColor: '#f4f4f4' };
 

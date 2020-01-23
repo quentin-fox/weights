@@ -14,18 +14,26 @@ const rootReducer = (state = initialWorkouts, action) => {
         case 'CYCLE_PAUSE':
             return produce(state, draft => {
                 const { workoutKey, exKey } = action.payload;
-                let timer = draft[workoutKey].data[exKey]
-                timer.paused = !timer.paused
+                let timer = draft[workoutKey].data[exKey];
+                timer.paused = !timer.paused;
             });
         case 'COUNT_DOWN':
             return produce(state, draft => {
                 const { workoutKey, exKey, by } = action.payload;
-                let timer = draft[workoutKey].data[exKey]
+                let timer = draft[workoutKey].data[exKey];
 
-                timer.elapsed -= by;
+                draft[workoutKey].data[exKey].elapsed += by;
 
-                if (timer.elapsed === timer.initial) {
-                    timer.complete = true;
+                const timerComplete = timer.elapsed === timer.initial;
+                const isLastExercise = exKey === draft[workoutKey].data.length - 1;
+
+                if (timerComplete) {
+                    draft[workoutKey].data[exKey].complete = true;
+                    draft[workoutKey].data[exKey].showing = false;
+
+                    if (!isLastExercise) {
+                        draft[workoutKey].data[exKey + 1].showing = true;
+                    }
                 }
             });
         case 'RESET_TIMER':
@@ -37,7 +45,7 @@ const rootReducer = (state = initialWorkouts, action) => {
         case 'TOGGLE_SHOWING':
             return produce(state, draft => {
                 const { workoutKey, exKey } = action.payload;
-                let showing = draft[workoutKey].data[exKey].showing;
+                const showing = draft[workoutKey].data[exKey].showing;
                 if (showing === false) {
                     // if toggling to showing, hide all other exercises
                     draft[workoutKey].data = draft[workoutKey].data.map((exercise, key) => {
@@ -47,17 +55,27 @@ const rootReducer = (state = initialWorkouts, action) => {
                         return exercise;
                     });
                 }
-                showing = !showing
+                draft[workoutKey].data[exKey].showing = !showing;
             });
         case 'TOGGLE_SET':
             return produce(state, draft => {
                 const { workoutKey, exKey, setKey } = action.payload;
-                let exercise = draft[workoutKey].data[exKey]
-                exercise.sets[setKey] = !exercise.sets[setKey]
-                if (exercise.sets.every(Boolean)) {
-                    exercise.complete = true;
+                draft[workoutKey].data[exKey].sets[setKey] = !draft[workoutKey].data[exKey].sets[
+                    setKey
+                ];
+
+                const allSetsComplete = draft[workoutKey].data[exKey].sets.every(Boolean);
+                const isLastExercise = exKey === draft[workoutKey].data.length - 1;
+
+                if (allSetsComplete) {
+                    draft[workoutKey].data[exKey].complete = true;
+                    draft[workoutKey].data[exKey].showing = false;
+
+                    if (!isLastExercise) {
+                        draft[workoutKey].data[exKey + 1].showing = true;
+                    }
                 }
-            })
+            });
         default:
             return state;
     }
