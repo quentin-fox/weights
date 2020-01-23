@@ -7,119 +7,73 @@ import Control from '../src/components/titlecontrol';
 import AddButton from '../src/components/add-button';
 import NewExerciseModal from '../src/components/new-exercise-modal';
 import { connect } from 'react-redux';
-import { addExercise } from '../reducers/rootReducer';
+import {
+    addExercise,
+    cyclePause,
+    countDown,
+    resetTimer,
+    toggleShowing,
+    toggleSet,
+} from '../actions/actions';
 
 const mapStateToProps = (state, ownProps) => {
     const workoutID = ownProps.navigation.state.params.id;
     return {
         workout: state[workoutID],
-    }
-}
- const mapDispatchToProps = dispatch => {
-     return {
-         onAddExercise: (key, type, data) => dispatch(addExercise(key, type, data))
-     }
- }
+    };
+};
+const mapDispatchToProps = dispatch => {
+    return {
+        onAddExercise: (workoutKey, type, data) => dispatch(addExercise(workoutKey, type, data)),
+        onCyclePause: (workoutKey, exKey) => dispatch(cyclePause(workoutKey, exKey)),
+        onCountDown: (workoutKey, exKey, by) => dispatch(countDown(workoutKey, exKey, by)),
+        onResetTimer: (workoutKey, exKey) => dispatch(resetTimer(workoutKey, exKey)),
+        onToggleShowing: (workoutKey, exKey) => dispatch(toggleShowing(workoutKey, exKey)),
+        onToggleSet: (workoutKey, exKey, setKey) => dispatch(toggleSet(workoutKey, exKey, setKey)),
+    };
+};
 
-const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
+const WorkoutScreen = ({
+    navigation,
+    workout,
+    onAddExercise,
+    onCyclePause,
+    onCountDown,
+    onResetTimer,
+    onToggleShowing,
+    onToggleSet,
+}) => {
 
-    const [data, setData] = useState(workout.data);
 
-    const canBeginWorkout = workout.data > 0;
-
-    const [modalVisible, setModalVisible] = useState(false);
-
+    const data = workout.data;
+    const canBeginWorkout = workout.data.length > 0;
     const title = workout.title;
+    const workoutKey = navigation.state.params.id;
 
-    const handleCyclePause = key => {
-        const newData = [...data];
-        newData[key].paused = !newData[key].paused;
-        setData(newData);
+    const handleCyclePause = exKey => {
+        onCyclePause(workoutKey, exKey)
     };
 
-    const handleCountDown = key => {
-        const newData = [...data];
-        newData[key].elapsed += 1;
-        setData(newData);
-    };
-
-    const handleResetTimer = key => {
-        const newData = [...data];
-        newData[key].elapsed = 0;
-        newData[key].complete = false;
-        newData[key].paused = true;
-        setData(newData);
-    };
-
-    const handleToggleShowing = key => {
-        let newData = [...data];
-        const oldState = newData[key].showing;
-        newData[key].showing = !newData[key].showing;
-        if (oldState === false) {
-            newData = newData.map((d, i) => {
-                if (i !== key) {
-                    d.showing = false;
-                }
-                return d;
-            });
-        }
-        setData(newData);
-    };
-
-    const handleAddExercise = (type, exData) => {
-        const workoutID = navigation.state.params.id;
-        onAddExercise(workoutID, type, exData)
+    const handleCountDown = exKey => {
+        const by = 1
+        onCountDown(workoutKey, exKey, by)
     }
 
-    // const handleAddExercise = (exData, type) => {
+    const handleResetTimer = exKey => {
+        onResetTimer(workoutKey, exKey)
+    }
 
-    //     const shapeData = (exData, type) => {
-    //         switch (type) {
-    //             case 'resistance':
-    //                 return {
-    //                     baseWeight: exData.weight,
-    //                     name: exData.name,
-    //                     reps: exData.reps,
-    //                     sets: Array(exData.sets).fill(false),
-    //                 };
-    //             case 'timer':
-    //                 return {
-    //                     initial: exData.duration,
-    //                     elapsed: 0,
-    //                     paused: true,
-    //                 };
-    //         }
-    //     };
-
-    //     let newExercise = shapeData(exData, type);
-    //     newExercise['showing'] = false;
-    //     newExercise['complete'] = false;
-    //     newExercise['type'] = type;
-
-    //     console.log(newExercise)
-
-    //     setData([...data, newExercise]);
-    // };
+    const handleToggleShowing = exKey => {
+        onToggleShowing(workoutKey, exKey)
+    }
 
     const handleToggleSet = (exKey, setKey) => {
-        const newData = [...data];
-        newData[exKey].sets[setKey] = !newData[exKey].sets[setKey];
-        setData(newData);
-    };
-
-    const handleComplete = key => {
-        let newData = [...data];
-        // not the last exercise
-        if (key < data.length - 1) {
-            newData[key + 1].showing = true;
-        }
-
-        newData[key].showing = false;
-        newData[key].complete = true;
-        setData(newData);
-    };
+        onToggleSet(workoutKey, exKey, setKey)
+    }
 
     const baseAppStyle = { flex: 1, backgroundColor: '#f4f4f4' };
+
+    const [modalVisible, setModalVisible] = useState(false);
 
     return (
         <SafeAreaView style={baseAppStyle}>
@@ -139,7 +93,6 @@ const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
                                 <ResistanceExercise
                                     onToggleSet={handleToggleSet}
                                     onToggleShowing={handleToggleShowing}
-                                    onComplete={handleComplete}
                                     data={{ ...exData, key: index }}
                                     key={index}
                                 />
@@ -151,7 +104,6 @@ const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
                                     onResetTimer={handleResetTimer}
                                     onCountDown={handleCountDown}
                                     onToggleShowing={handleToggleShowing}
-                                    onComplete={handleComplete}
                                     data={{ ...exData, key: index }}
                                     key={index}
                                 />
@@ -181,6 +133,11 @@ WorkoutScreen.propTypes = {
         data: PropTypes.array,
     }),
     onAddExercise: PropTypes.func,
+    onCyclePause: PropTypes.func,
+    onCountDown: PropTypes.func,
+    onResetTimer: PropTypes.func,
+    onToggleShowing: PropTypes.func,
+    onToggleSet: PropTypes.func,
 };
 
 const style = StyleSheet.create({
@@ -196,4 +153,7 @@ const style = StyleSheet.create({
     },
 });
 
-export default connect(mapStateToProps, mapDispatchToProps)(WorkoutScreen);
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(WorkoutScreen);

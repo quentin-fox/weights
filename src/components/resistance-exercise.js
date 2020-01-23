@@ -7,18 +7,10 @@ import Circle from './circle';
 const ResistanceExercise = ({
     onToggleSet,
     onToggleShowing,
-    onComplete,
     data: { key, showing, complete, name, reps, baseWeight, sets },
 }) => {
 
 
-    const nextExercise = () => {
-        if (sets.every(Boolean) && !complete) {
-            onComplete(key);
-        }
-    }
-
-    useEffect(nextExercise);
 
     return (
         <TouchableWithoutFeedback onPress={() => onToggleShowing(key)}>

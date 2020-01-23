@@ -6,7 +6,6 @@ const Timer = ({
     onResetTimer,
     onCountDown,
     onToggleShowing,
-    onComplete,
     data: { key, showing, complete, initial, elapsed, paused },
 }) => {
     const buttonName = paused ? 'Start' : 'Stop';
@@ -14,14 +13,6 @@ const Timer = ({
     const shouldDecrement = !paused && elapsed < initial;
 
     const currentTime = new Date(1000 * (initial - elapsed)).toISOString().substr(14, 5);
-
-    const nextExercise = () => {
-        if (!complete && elapsed === initial) {
-            onComplete(key);
-        }
-    };
-
-    useEffect(nextExercise, [elapsed]);
 
     usePreciseTimer(() => onCountDown(key), 1000, shouldDecrement);
 
