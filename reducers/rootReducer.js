@@ -1,52 +1,5 @@
 import produce from 'immer';
-
-export const addWorkout = (name) => {
-    return {
-        type: 'ADD_WORKOUT',
-        payload: name,
-    };
-};
-
-export const addExercise = (key, type, data) => {
-    return {
-        type: 'ADD_EXERCISE',
-        payload: {
-            key,
-            type,
-            data,
-        },
-    };
-};
-
-const exerciseReshaper = (data, type) => {
-
-    const shapeData = (exerciseData, exerciseType) => {
-        switch (exerciseType) {
-            case 'resistance':
-                return {
-                    type,
-                    baseWeight: exerciseData.weight,
-                    name: exerciseData.name,
-                    reps: exerciseData.reps,
-                    sets: Array(exerciseData.sets).fill(false),
-                };
-            case 'timer':
-                return {
-                    type,
-                    initial: exerciseData.duration,
-                    elapsed: 0,
-                    paused: true,
-                };
-        }
-    };
-
-    let newExercise = shapeData(data, type);
-    newExercise['showing'] = false;
-    newExercise['complete'] = false;
-    newExercise['type'] = type;
-
-    return newExercise;
-};
+import { exerciseReshaper } from '../helpers';
 
 const rootReducer = (state = initialWorkouts, action) => {
     switch (action.type) {
@@ -54,10 +7,57 @@ const rootReducer = (state = initialWorkouts, action) => {
             return [...state, { title: action.payload, data: [] }];
         case 'ADD_EXERCISE':
             return produce(state, draft => {
-                const { key, type, data } = action.payload;
+                const { workoutKey, type, data } = action.payload;
                 const newExercise = exerciseReshaper(data, type);
-                draft[key].data.push(newExercise);
+                draft[workoutKey].data.push(newExercise);
             });
+        case 'CYCLE_PAUSE':
+            return produce(state, draft => {
+                const { workoutKey, exKey } = action.payload;
+                let timer = draft[workoutKey].data[exKey]
+                timer.paused = !timer.paused
+            });
+        case 'COUNT_DOWN':
+            return produce(state, draft => {
+                const { workoutKey, exKey, by } = action.payload;
+                let timer = draft[workoutKey].data[exKey]
+
+                timer.elapsed -= by;
+
+                if (timer.elapsed === timer.initial) {
+                    timer.complete = true;
+                }
+            });
+        case 'RESET_TIMER':
+            return produce(state, draft => {
+                const { workoutKey, exKey } = action.payload;
+                draft[workoutKey].data[exKey].elapsed = 0;
+                draft[workoutKey].data[exKey].complete = true;
+            });
+        case 'TOGGLE_SHOWING':
+            return produce(state, draft => {
+                const { workoutKey, exKey } = action.payload;
+                let showing = draft[workoutKey].data[exKey].showing;
+                if (showing === false) {
+                    // if toggling to showing, hide all other exercises
+                    draft[workoutKey].data = draft[workoutKey].data.map((exercise, key) => {
+                        if (key !== exKey) {
+                            exercise.showing = false;
+                        }
+                        return exercise;
+                    });
+                }
+                showing = !showing
+            });
+        case 'TOGGLE_SET':
+            return produce(state, draft => {
+                const { workoutKey, exKey, setKey } = action.payload;
+                let exercise = draft[workoutKey].data[exKey]
+                exercise.sets[setKey] = !exercise.sets[setKey]
+                if (exercise.sets.every(Boolean)) {
+                    exercise.complete = true;
+                }
+            })
         default:
             return state;
     }
