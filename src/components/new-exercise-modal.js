@@ -27,11 +27,11 @@ const NewExerciseModal = ({ visible, onClose, onAddExercise }) => {
     const onSubmit = () => {
         switch (exerciseType) {
             case 'timer':
-                onAddExercise(timerData, 'timer');
+                onAddExercise('timer', timerData);
                 onClose()
                 break;
             case 'resistance':
-                onAddExercise(resistanceData, 'resistance');
+                onAddExercise('resistance', resistanceData);
                 onClose()
                 break;
         }

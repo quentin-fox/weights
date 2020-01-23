@@ -23,7 +23,7 @@ const mapStateToProps = (state, ownProps) => {
 
 const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
 
-    const [data, setData] = useState(workout);
+    const [data, setData] = useState(workout.data);
 
     const canBeginWorkout = workout.data > 0;
 
@@ -66,9 +66,9 @@ const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
         setData(newData);
     };
 
-    const handleAddExercise = (type, data) => {
-        const workoutID = props.navigation.state.params.id;
-        onAddExercise(workoutID, type, data)
+    const handleAddExercise = (type, exData) => {
+        const workoutID = navigation.state.params.id;
+        onAddExercise(workoutID, type, exData)
     }
 
     // const handleAddExercise = (exData, type) => {
@@ -176,6 +176,11 @@ const WorkoutScreen = ({ navigation, workout, onAddExercise }) => {
 
 WorkoutScreen.propTypes = {
     navigation: PropTypes.any,
+    workout: PropTypes.shape({
+        title: PropTypes.string,
+        data: PropTypes.array,
+    }),
+    onAddExercise: PropTypes.func,
 };
 
 const style = StyleSheet.create({

@@ -60,8 +60,8 @@ const WorkoutListScreen = ({ navigation, workouts, onAddWorkout }) => {
                     style={{ height: '100%' }}
                     data={workouts}
                     keyExtractor={data => data.title}
-                    renderItem={({ _, index }) => (
-                        <WorkoutCard navigation={navigation} id={index} />
+                    renderItem={({ item, index }) => (
+                        <WorkoutCard navigation={navigation} item={item} id={index} />
                     )}
                 />
                 <NewWorkoutModal
@@ -80,7 +80,7 @@ WorkoutListScreen.propTypes = {
     workouts: PropTypes.arrayOf(PropTypes.object),
 };
 
-const WorkoutCard = ({ navigation, id }) => {
+const WorkoutCard = ({ navigation, item, id }) => {
     const onDoWorkout = () => {
         navigation.navigate('workout', { id });
     };
@@ -96,6 +96,7 @@ const WorkoutCard = ({ navigation, id }) => {
 
 WorkoutCard.propTypes = {
     navigation: PropTypes.any,
+    item: PropTypes.object,
     id: PropTypes.number,
 };
 

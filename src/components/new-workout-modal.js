@@ -9,6 +9,7 @@ const NewWorkoutModal = ({ visible, onClose, onAddWorkout }) => {
     const [workoutTitle, setWorkoutTitle] = useState('');
 
     const handleAddButton = () => {
+        onClose()
         onAddWorkout(workoutTitle)
     }
 

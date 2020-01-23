@@ -18,11 +18,13 @@ export const addExercise = (key, type, data) => {
     };
 };
 
-const exerciseReducer = (data, type) => {
+const exerciseReshaper = (data, type) => {
+
     const shapeData = (exerciseData, exerciseType) => {
         switch (exerciseType) {
             case 'resistance':
                 return {
+                    type,
                     baseWeight: exerciseData.weight,
                     name: exerciseData.name,
                     reps: exerciseData.reps,
@@ -30,6 +32,7 @@ const exerciseReducer = (data, type) => {
                 };
             case 'timer':
                 return {
+                    type,
                     initial: exerciseData.duration,
                     elapsed: 0,
                     paused: true,
@@ -52,7 +55,7 @@ const rootReducer = (state = initialWorkouts, action) => {
         case 'ADD_EXERCISE':
             return produce(state, draft => {
                 const { key, type, data } = action.payload;
-                const newExercise = exerciseReducer(data, type);
+                const newExercise = exerciseReshaper(data, type);
                 draft[key].data.push(newExercise);
             });
         default:
